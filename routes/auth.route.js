@@ -34,7 +34,7 @@ router.post(
       });
     }
     // get name, email & password from request
-    const { name, email, passsword } = req.body;
+    const { name, email, password } = req.body;
 
     try {
       // check if user exist
