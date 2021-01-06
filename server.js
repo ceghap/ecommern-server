@@ -7,13 +7,18 @@ require("dotenv").config({
   path: "./config/index.env",
 });
 
-app.use(express.urlencoded({ extended: true }));
+// MongoDB
+const connectDB = require("./config/db");
+
+app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("test route => home page");
 });
+
+app.use("/api/user/", require("./routes/auth.route"));
 
 // Page Not Found
 app.use((req, res) => {
