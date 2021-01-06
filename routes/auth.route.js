@@ -102,4 +102,72 @@ router.post(
   }
 );
 
+// @route  POST api/user/login
+// @desc   Login user
+// @access Public
+router.post(
+  "/login",
+  [
+    check("email", "please include a valid email").isEmail(),
+    check("password", "password is required").exists(),
+  ],
+  async (req, res) => {
+    // if there is error
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+
+    // if everything ok
+    // get email & password from request body
+    const { email, password } = req.body;
+
+    try {
+      // find user
+      let user = await User.findOne({ email });
+
+      // if user not found
+      if (!user) {
+        res.status(400).json({
+          msg: "Invalid credentials",
+        });
+      }
+
+      // user found
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      // if password not match
+      if (!isMatch) {
+        return res.status(400).json({
+          msg: "Invalid credentials",
+        });
+      }
+
+      // payload for jwt
+      const payload = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        { expiresIn: 36000 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({
+            token,
+          });
+        }
+      );
+    } catch (error) {
+      res.status(500).json({
+        msg: error.message,
+      });
+    }
+  }
+);
 module.exports = router;
