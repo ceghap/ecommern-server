@@ -6,10 +6,24 @@ const bcrypt = require("bcrypt"); // encrypt password
 // req validation
 const { check, validationResult } = require("express-validator");
 const gravatar = require("gravatar"); // get user image by email
-
+const auth = require("../middleware/auth");
 // Models
 const User = require("../models/User");
 
+// @route  POST api/user
+// @desc   User information
+// @access Private
+router.get("/", auth, async (req, res) => {
+  try {
+    // Get user info by in from db
+    const user = await User.findById(req.user.id).select("-password");
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      msg: error.message,
+    });
+  }
+});
 // @route  POST api/user/register
 // @desc   Register user
 // @access Public
